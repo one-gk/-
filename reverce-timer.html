@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>増減タイマー</title>
+  <style>
+    body {
+      font-family: 'Helvetica Neue', sans-serif;
+      background: #f0f0f0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+      color: #333;
+    }
+
+    #time {
+      font-size: 48px;
+      font-weight: bold;
+      margin: 20px;
+      background: #fff;
+      padding: 20px 40px;
+      border-radius: 20px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .buttons {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    button {
+      font-size: 18px;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 12px;
+      background-color: #007bff;
+      color: white;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    button:disabled {
+      background-color: #cccccc;
+      cursor: not-allowed;
+    }
+  </style>
+</head>
+<body>
+  <h1>増えてから減るタイマー</h1>
+  <div id="time">00:00:00</div>
+
+  <div class="buttons">
+    <button onclick="start()">スタート</button>
+    <button onclick="reverse()">リバース</button>
+    <button onclick="reset()">リセット</button>
+  </div>
+
+  <!-- 終了音 -->
+  <audio id="beep" src="https://www.soundjay.com/button/beep-07.wav" preload="auto"></audio>
+
+  <script>
+    let time = 0;
+    let countdownTime = 0;
+    let timer = null;
+    let mode = "stopped"; // "up", "down", "stopped"
+
+    const timeDisplay = document.getElementById("time");
+    const beepSound = document.getElementById("beep");
+
+    function formatTime(seconds) {
+      const hrs = String(Math.floor(seconds / 3600)).padStart(2, '0');
+      const mins = String(Math.floor((seconds % 3600) / 60)).padStart(2, '0');
+      const secs = String(seconds % 60).padStart(2, '0');
+      return `${hrs}:${mins}:${secs}`;
+    }
+
+    function updateDisplay() {
+      timeDisplay.textContent = formatTime(mode === "down" ? countdownTime : time);
+    }
+
+    function start() {
+      if (mode !== "stopped") return;
+      mode = "up";
+      timer = setInterval(() => {
+        time++;
+        updateDisplay();
+      }, 1000);
+    }
+
+    function reverse() {
+      if (mode !== "up") return;
+      clearInterval(timer);
+      mode = "down";
+      countdownTime = time;
+      timer = setInterval(() => {
+        if (countdownTime > 0) {
+          countdownTime--;
+          updateDisplay();
+        } else {
+          clearInterval(timer);
+          mode = "stopped";
+          updateDisplay();
+          beepSound.play(); // 🔔 音を鳴らす
+          alert("タイマー終了！");
+        }
+      }, 1000);
+    }
+
+    function reset() {
+      clearInterval(timer);
+      time = 0;
+      countdownTime = 0;
+      mode = "stopped";
+      updateDisplay();
+    }
+
+    updateDisplay();
+  </script>
+</body>
+</html>
